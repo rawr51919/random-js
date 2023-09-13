@@ -38,16 +38,16 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build:umd": "rollup -c rollup.config.es3.js --format umd -o dist/random-js.umd.js --name Random -m",
-    "build:esm": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/random-js.esm.js",
-    "prebuild": "yarn clean",
-    "build": "yarn build:umd --bundleConfigAsCjs && yarn build:esm --bundleConfigAsCjs",
+    "build:umd": "rollup -c rollup.config.es3.js --format umd -o dist/random-js.umd.js --name Random -m --bundleConfigAsCjs",
+    "build:esm": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/random-js.esm.js --bundleConfigAsCjs",
+    "prebuild": "npm run clean",
+    "build": "npm run build:umd && npm run build:esm",
     "minify": "terser --source-map content=dist/random-js.umd.js.map --compress --mangle --output dist/random-js.umd.min.js dist/random-js.umd.js",
-    "postbuild": "yarn minify",
+    "postbuild": "npm run minify",
     "benchmark": "for k in benchmark/*.js; do node $k; done",
     "test": "jest",
     "lint": "tslint --project .",
-    "prepublish": "yarn clean && yarn lint && yarn test && yarn build"
+    "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
   },
   "testling": {
     "files": "spec/*.js"
