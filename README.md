@@ -56,6 +56,29 @@ The problem with both of these approaches is that the distribution of integers t
 
 `randomInt` may more evenly distribute its biased, but it is still wrong. `randomIntByModulo`, at least in the example given, is heavily biased to return [0, 67] over [68, 99].
 
+It is vastly more apparent in integers close to 2^32, or really any integer that approaches but not surpass 2^n. Given a perfectly uniform integer distribution, one can play a monte carlo game and run through each possibility of integers. In the following example, assume that we're only dealing with a floating point that holds 4 bits instead of 53 or 32 (which is `Math.random()`'s bit randomness, based on the engine):
+
+```js
+Math.floor(0 * 5) = 0
+Math.floor(0.0625 * 5) = 0
+Math.floor(0.125 * 5) = 0
+Math.floor(0.1875 * 5) = 0
+Math.floor(0.25 * 5) = 1
+Math.floor(0.3125 * 5) = 1
+Math.floor(0.375 * 5) = 1
+Math.floor(0.4375 * 5) = 2
+Math.floor(0.5 * 5) = 2
+Math.floor(0.5625 * 5) = 2
+Math.floor(0.625 * 5) = 3
+Math.floor(0.6875 * 5) = 3
+Math.floor(0.75 * 5) = 3
+Math.floor(0.8125 * 5) = 4
+Math.floor(0.875 * 5) = 4
+Math.floor(0.9375 * 5) = 4
+```
+
+As you can see, in this contrived example, we are slightly biased toward rolling a 0 compared to rolling 1-4. Of course, as you add more bits of entropy, the bias shows itself less and less, based on how close your integer distribution is to 2^n.
+
 In order to eliminate bias, sometimes the engine which random data is pulled from may need to be used more than once.
 
 Random.js provides a series of distributions to alleviate this.
