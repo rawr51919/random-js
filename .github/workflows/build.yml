@@ -18,8 +18,5 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install dependencies with npm
+      - name: Install dependencies and run prepublish script with npm
         run: npm ci
-
-      - name: Run prepublish script with npm
-        run: npm run prepublish
