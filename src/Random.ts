@@ -21,9 +21,31 @@ import { uint53 } from "./distribution/uint53";
 import { uint53Full } from "./distribution/uint53Full";
 import { uuid4 } from "./distribution/uuid4";
 import { nativeMath } from "./engine/nativeMath";
+import { browserCrypto } from "./engine/browserCrypto";
+import { nodeCrypto } from "./engine/nodeCrypto";
 import { Engine } from "./types";
 
 // tslint:disable:unified-signatures
+
+function detectDefaultEngine(): Engine {
+  if (typeof window !== "undefined" && typeof window.crypto?.getRandomValues === "function") {
+    return browserCrypto;
+  }
+
+  if (typeof process !== "undefined" && process?.versions?.node) {
+    try {
+      const crypto = require("crypto");
+      if (crypto?.randomBytes) {
+        return nodeCrypto;
+      }
+    } catch {
+      // fallback to nativeMath if crypto.randomBytes is unsupported
+      return nativeMath;
+    }
+  }
+
+  return nativeMath;
+}
 
 /**
  * A wrapper around an Engine that provides easy-to-use methods for
@@ -36,8 +58,24 @@ export class Random {
    * Creates a new Random wrapper
    * @param engine The engine to use (defaults to a `Math.random`-based implementation)
    */
-  constructor(engine: Engine = nativeMath) {
-    this.engine = engine;
+  constructor();
+  /**
+   * Creates a new Random wrapper
+   * @param engine The engine to use (explicitly provided)
+   */
+  constructor(engine: Engine);
+  constructor(engine?: Engine) {
+    // LEGACY: Default to nativeMath for backward compatibility
+    this.engine = engine ?? nativeMath;
+  }
+
+  /**
+   * Creates a new Random wrapper that automatically detects
+   * and uses the best available engine for the current environment.
+   * @returns A Random instance using auto-detected engine
+   */
+  public static auto(): Random {
+    return new Random(detectDefaultEngine());
   }
 
   /**
@@ -84,17 +122,17 @@ export class Random {
 
   /**
    * Returns a value within [min, max]
-   * @param min The minimum integer value, inclusive. No less than -0x20000000000000.
-   * @param max The maximum integer value, inclusive. No greater than 0x20000000000000.
+   * @param minimum The minimum integer value, inclusive. No less than -0x20000000000000.
+   * @param maximum The maximum integer value, inclusive. No greater than 0x20000000000000.
    */
-  public integer(min: number, max: number): number {
-    return integer(min, max)(this.engine);
+  public integer(minimum: number, maximum: number): number {
+    return integer(minimum, maximum)(this.engine);
   }
 
   /**
    * Returns the maximum of the values specified within [min, max]
-   * @param min The minimum integer value, inclusive. No less than -0x20000000000000. Discarded.
-   * @param max The maximum integer value, inclusive. No greater than 0x20000000000000.
+   * @param minimum The minimum integer value, inclusive. No less than -0x20000000000000. Discarded.
+   * @param maximum The maximum integer value, inclusive. No greater than 0x20000000000000.
    */
   public max(minimum: number, maximum: number): number {
     return max(minimum, maximum)(this.engine);
@@ -102,8 +140,8 @@ export class Random {
 
   /**
    * Returns the minimum of the values specified within [min, max]
-   * @param min The minimum integer value, inclusive. No less than -0x20000000000000.
-   * @param max The maximum integer value, inclusive. No greater than 0x20000000000000. Discarded.
+   * @param minimum The minimum integer value, inclusive. No less than -0x20000000000000.
+   * @param maximum The maximum integer value, inclusive. No greater than 0x20000000000000. Discarded.
    */
   public min(minimum: number, maximum: number): number {
     return min(minimum, maximum)(this.engine);
@@ -129,8 +167,8 @@ export class Random {
    * @param max The maximum floating-point value.
    * @param inclusive If true, `max` will be inclusive.
    */
-  public real(min: number, max: number, inclusive: boolean = false): number {
-    return real(min, max, inclusive)(this.engine);
+  public real(minimum: number, maximum: number, inclusive: boolean = false): number {
+    return real(minimum, maximum, inclusive)(this.engine);
   }
 
   /**

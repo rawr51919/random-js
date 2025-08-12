@@ -34,6 +34,7 @@ Random.js provides a set of "engines" for producing random integers, which consi
 - `browserCrypto`: Utilizes [`crypto.getRandomValues(Int32Array)`](https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues). Only supported on newer browsers, but promises cryptographically random numbers.
 - `nodeCrypto`: Utilizes [`require('crypto').randomBytes(size)`](https://nodejs.org/api/crypto.html#crypto_crypto_randombytes_size_callback). Only supported on node.
 - `MersenneTwister19937`: An implementation of the [Mersenne Twister](http://en.wikipedia.org/wiki/Mersenne_twister) algorithm. Not cryptographically secure, but its results are repeatable. Must be seeded with a single integer or an array of integers or call `.autoSeed()` to automatically seed initial data. Guaranteed to produce consistent results across all JavaScript implementations assuming the same seed.
+- `XorGen4096`: An implementation of the [xorgens4096](https://journal.austms.org.au/ojs/index.php/ANZIAMJ/article/view/40) efficient XOR-based generator with a 4096-bit internal state. Must be seeded with a single integer or an array of integers or call `.autoSeed()` to automatically seed initial data. It is faster than `MersenneTwister19937` in many scenarios but still provides consistent, repeatable output across JavaScript engines. Not suitable for cryptographic purposes.
 
 One is also free to implement their own engine as long as it returns 32-bit integers, either signed or unsigned.
 
@@ -106,7 +107,7 @@ const clone = MersenneTwister19937.seedWithArray(seed).discard(
 Random.js also provides a set of methods for producing useful data from an engine.
 
 - `integer(min, max)(engine)`: Produce an integer within the inclusive range [`min`, `max`]. `min` can be at its minimum -9007199254740992 (-2 ** 53). `max` can be at its maximum 9007199254740992 (2 ** 53).
-- `real(min, max, inclusive)(engine)`: Produce a floating point number within the range [`min`, `max`) or [`min`, `max`]. Uses 53 bits of randomness.
+- `real(min, max, inclusive)(engine)`: Produce a floating point number within the range [`min`, `max`] or [`min`, `max`]. Uses 53 bits of randomness.
 - `bool()(engine)`: Produce a boolean with a 50% chance of it being `true`.
 - `bool(percentage)(engine)`: Produce a boolean with the specified chance causing it to be `true`.
 - `bool(numerator, denominator)(engine)`: Produce a boolean with `numerator`/`denominator` chance of it being true.
@@ -167,7 +168,7 @@ const otherRandom = new Random(); // same as new Random(nativeMath)
 This abstracts the concepts of engines and distributions.
 
 - `r.integer(min, max)`: Produce an integer within the inclusive range [`min`, `max`]. `min` can be at its minimum -9007199254740992 (2 ** 53). `max` can be at its maximum 9007199254740992 (2 ** 53). The special number `-0` is never returned.
-- `r.real(min, max, inclusive)`: Produce a floating point number within the range [`min`, `max`) or [`min`, `max`]. Uses 53 bits of randomness.
+- `r.real(min, max, inclusive)`: Produce a floating point number within the range [`min`, `max`] or [`min`, `max`]. Uses 53 bits of randomness.
 - `r.bool()`: Produce a boolean with a 50% chance of it being `true`.
 - `r.bool(percentage)`: Produce a boolean with the specified chance causing it to be `true`.
 - `r.bool(numerator, denominator)`: Produce a boolean with `numerator`/`denominator` chance of it being true.
@@ -199,7 +200,33 @@ or
 yarn add random-js
 ```
 
-In your code:
+If you wish to get a version without `nodeCrypto` (which is known to cause issues with some use cases, like some web applications), run this command:
+
+```sh
+npm install random-js-no-node
+```
+
+or
+
+```sh
+yarn add random-js-no-node
+```
+
+Or add Webpack 5+ polyfills for crypto to use `crypto-browserify` in your application's webpack config file:
+
+```js
+resolve: {
+    fallback: {
+        "crypto": require.resolve("crypto-browserify")
+    }
+}
+```
+
+These polyfills may depend on your application's needs, visit [the Webpack 5+ polyfills documentation](https://webpack.js.org/configuration/resolve/#resolvefallback) and [this Webpack 5+ polyfills cheatsheet](https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a) to learn more.
+
+For documentation on `random-js-no-node`, visit [the random-js-no-node repository](https://github.com/Spacerat/random-js), and for documentation on that package, go to [random-js-no-node on NPM](https://www.npmjs.com/package/random-js-no-node).
+
+To import `random-js` or `random-js-no-node`, in your code:
 
 ```js
 // ES6 Modules
@@ -223,6 +250,8 @@ const random = new Random(MersenneTwister19937.autoSeed());
 const value = random.integer(1, 100);
 ```
 
+where `random-js` may be `random-js-no-node` in these examples, depending on which variant you're using.
+
 It is recommended to create one shared engine and/or `Random` instance per-process rather than one per file.
 
 ### Browser using AMD or RequireJS
@@ -230,17 +259,17 @@ It is recommended to create one shared engine and/or `Random` instance per-proce
 Download `random.min.js` and place it in your project, then use one of the following patterns:
 
 ```js
-define(function(require) {
+define(function (require) {
   var Random = require("random");
   return new Random.Random(Random.MersenneTwister19937.autoSeed());
 });
 
-define(function(require) {
+define(function (require) {
   var Random = require("random");
   return new Random.Random();
 });
 
-define(["random"], function(Random) {
+define(["random"], function (Random) {
   return new Random.Random(Random.MersenneTwister19937.autoSeed());
 });
 ```
@@ -264,7 +293,7 @@ You can add your own methods to `Random` instances, as such:
 
 ```js
 var random = new Random();
-random.bark = function() {
+random.bark = function () {
   if (this.bool()) {
     return "arf!";
   } else {
@@ -284,7 +313,7 @@ function MyRandom(engine) {
 }
 MyRandom.prototype = Object.create(Random.prototype);
 MyRandom.prototype.constructor = MyRandom;
-MyRandom.prototype.mood = function() {
+MyRandom.prototype.mood = function () {
   switch (this.integer(0, 2)) {
     case 0:
       return "Happy";

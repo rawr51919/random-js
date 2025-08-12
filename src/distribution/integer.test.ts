@@ -119,9 +119,11 @@ describe("integer distribution", () => {
   function toCallback<T>(
     callback: T | ((index: number) => T)
   ): (index: number) => T {
-    return typeof callback === "function"
-      ? callback
-      : (returnValue(callback) as any);
+    if (typeof callback === "function") {
+      return callback as (index: number) => T;
+    } else {
+      return () => callback;
+    }
   }
 
   function times<T>(count: number, callback: T | ((index: number) => T)): T[] {
@@ -152,6 +154,19 @@ describe("integer distribution", () => {
       return [Math.floor((divisor - mod) / dividend), mod];
     } else {
       return [Math.floor(divisor / dividend), mod];
+    }
+  }
+
+  function addToBucketsCommon(
+    value: number,
+    factors: readonly number[],
+    buckets: number[][]
+  ) {
+    for (let i = 0, len = factors.length; i < len; ++i) {
+      const factor = factors[i];
+      const result = divmod(value, factor);
+      ++buckets[i][result[1]];
+      value = result[0];
     }
   }
 
@@ -190,13 +205,9 @@ describe("integer distribution", () => {
         });
 
         function addToBuckets(value: number) {
-          for (let i = 0, len = factors.length; i < len; ++i) {
-            const factor = factors[i];
-            const result = divmod(value, factor);
-            ++buckets[i][result[1]];
-            value = result[0];
-          }
+          addToBucketsCommon(value, factors, buckets);
         }
+
         for (let i = 0; i < iterationCount; ++i) {
           const r = distribution(engine);
 
@@ -334,13 +345,9 @@ describe("integer distribution", () => {
       });
 
       function addToBuckets(value: number) {
-        for (let i = 0, len = factors.length; i < len; ++i) {
-          const factor = factors[i];
-          const result = divmod(value, factor);
-          ++buckets[i][result[1]];
-          value = result[0];
-        }
+        addToBucketsCommon(value, factors, buckets);
       }
+
       for (let i = 0; i < iterationCount; ++i) {
         let r = 0;
         do {

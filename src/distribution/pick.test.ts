@@ -8,14 +8,16 @@ describe("pick", () => {
     it("throws", () => {
       const engine = { next: () => 0 };
       const array = {
-        length: 0
+        length: 0,
       };
 
       const action = () => pick(engine, array);
 
-      expect(action).toThrowError(
-        new RangeError("Cannot pick from an empty array")
-      );
+      // Check it throws the correct error type
+      expect(action).toThrow(RangeError);
+
+      // Check it throws with the expected error message
+      expect(action).toThrow("Cannot pick from an empty array");
     });
   });
 
@@ -29,7 +31,7 @@ describe("pick", () => {
       const dummy = "hello";
       const array = {
         length,
-        [index]: dummy
+        [index]: dummy,
       };
 
       const actual = pick(engine, array);
@@ -50,7 +52,7 @@ describe("pick", () => {
       const dummy = "hello";
       const array = {
         length,
-        [index]: dummy
+        [index]: dummy,
       };
 
       const actual = pick(engine, array, begin, end);

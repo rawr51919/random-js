@@ -1,4 +1,3 @@
-// import { integer } from "./integer";
 import { integer } from "./integer";
 import { picker } from "./picker";
 
@@ -12,7 +11,7 @@ describe("picker", () => {
 
     const action = () => picker(array);
 
-    expect(action).toThrowError(
+    expect(action).toThrow(
       new RangeError("Cannot pick from a source with no items")
     );
   });
