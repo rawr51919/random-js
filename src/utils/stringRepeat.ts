@@ -4,8 +4,8 @@ export const stringRepeat = (() => {
       return (pattern: string, count: number): string =>
         (pattern as any).repeat(count);
     }
-  } catch (_) {
-    // nothing to do here
+  } catch (e) {
+    console.warn("String.prototype.repeat check failed, using fallback:", e);
   }
   return (pattern: string, count: number): string => {
     let result = "";

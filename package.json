@@ -29,6 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "benchmark": "^2.1.4",
+    "decimal.js": "^10.6.0",
     "eslint": "^9.33.0",
     "jest": "^30.0.5",
     "prettier": "^3.6.2",

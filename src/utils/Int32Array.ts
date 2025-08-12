@@ -11,8 +11,8 @@ const I32Array: typeof Int32Array = (() => {
     if (view[0] === -INT32_SIZE) {
       return Int32Array;
     }
-  } catch (_) {
-    // nothing to do here
+  } catch (e) {
+    console.warn("Int32Array check failed, falling back to Array:", e);
   }
   return (Array as unknown) as typeof Int32Array;
 })();

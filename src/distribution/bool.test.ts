@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { bool } from "./bool";
 import { int32 } from "./int32";
 import { integer } from "./integer";
@@ -7,14 +8,18 @@ jest.mock("./int32");
 jest.mock("./uint53");
 jest.mock("./integer");
 
+const zeroEngine = { next: () => 0 };
+const oneEngine = { next: () => 1 }
+
+const returnTwo = () => 2;
+const returnThree = () => 3;
+
 describe("bool distribution", () => {
   describe("when passed no arguments", () => {
     it("returns true if the least bit is 1", () => {
       const distribution = bool();
 
-      const actual = distribution({
-        next: () => 1
-      });
+      const actual = distribution(oneEngine);
 
       expect(actual).toBe(true);
     });
@@ -22,41 +27,33 @@ describe("bool distribution", () => {
     it("returns false if the least bit is 0", () => {
       const distribution = bool();
 
-      const actual = distribution({
-        next: () => 2
-      });
+      const actual = distribution({ next: () => 2 });
 
       expect(actual).toBe(false);
     });
   });
 
   describe("when passed one argument", () => {
-    [0, -1, -0.5].forEach(value => {
-      describe(`when passed ${value}`, () => {
-        it("always returns false", () => {
-          const distribution = bool(value);
-
-          for (let i = 0; i < 10; ++i) {
-            expect(distribution(undefined!)).toBe(false);
-          }
-        });
+    describe.each([0, -1, -0.5])("when passed %p", (value) => {
+      it("always returns false", () => {
+        const distribution = bool(value);
+        for (let i = 0; i < 10; ++i) {
+          expect(distribution(undefined!)).toBe(false);
+        }
       });
     });
 
-    [1, 2, 1.5].forEach(value => {
-      describe(`when passed ${value}`, () => {
-        it("always returns true", () => {
-          const distribution = bool(value);
-
-          for (let i = 0; i < 10; ++i) {
-            expect(distribution(undefined!)).toBe(true);
-          }
-        });
+    describe.each([1, 2, 1.5])("when passed %p", (value) => {
+      it("always returns true", () => {
+        const distribution = bool(value);
+        for (let i = 0; i < 10; ++i) {
+          expect(distribution(undefined!)).toBe(true);
+        }
       });
     });
 
     describe("when passed a number that only requires 32 bits of randomness", () => {
-      it(`returns false if int32 passes in a value >= than the percentage * ${0x100000000}`, () => {
+      it(`returns false if int32 passes in a value >= percentage * 0x100000000`, () => {
         jest.resetAllMocks();
         const percentage = 0.125;
         (int32 as jest.Mock).mockReturnValue(
@@ -64,53 +61,49 @@ describe("bool distribution", () => {
         );
         const distribution = bool(percentage);
 
-        const actual = distribution({
-          next: () => 0
-        });
+        const actual = distribution(zeroEngine);
 
         expect(actual).toBe(false);
       });
 
-      it(`returns true if int32 passes in a value < than the percentage * ${0x100000000}`, () => {
+      it(`returns true if int32 passes in a value < percentage * 0x100000000`, () => {
         const percentage = 0.125;
         (int32 as jest.Mock).mockReturnValue(
           Math.ceil(percentage * 0x100000000) - 0x80000001
         );
         const distribution = bool(percentage);
 
-        const actual = distribution({
-          next: () => 0
-        });
+        const actual = distribution(zeroEngine);
 
         expect(actual).toBe(true);
       });
     });
 
     describe("when passed a number that requires more than 32 bits of randomness", () => {
-      it(`returns false if uint53 passes in a value >= than the percentage * ${0x20000000000000}`, () => {
-        const percentage = 0.1234567890123456789;
-        (uint53 as jest.Mock).mockReturnValue(
-          Math.ceil(percentage * 0x20000000000000)
-        );
-        const distribution = bool(percentage);
+      it(`returns false if uint53 passes in a value >= percentage * 0x20000000000000`, () => {
+        const percentage = new Decimal("0.1234567890123456789");
+        const scale = new Decimal("0x20000000000000");
 
-        const actual = distribution({
-          next: () => 0
-        });
+        (uint53 as jest.Mock).mockReturnValue(
+          percentage.mul(scale).ceil().toNumber()
+        );
+        const distribution = bool(percentage.toNumber());
+
+        const actual = distribution(zeroEngine);
 
         expect(actual).toBe(false);
       });
 
-      it(`returns true if uint53 passes in a value < than the percentage * ${0x20000000000000}`, () => {
-        const percentage = 0.1234567890123456789;
-        (uint53 as jest.Mock).mockReturnValue(
-          Math.floor(percentage * 0x20000000000000) - 1
-        );
-        const distribution = bool(percentage);
+      it(`returns true if uint53 passes in a value < percentage * 0x20000000000000`, () => {
+        const percentage = new Decimal("0.1234567890123456789");
+        const scale = new Decimal("0x20000000000000");
 
-        const actual = distribution({
-          next: () => 0
-        });
+        (uint53 as jest.Mock).mockReturnValue(
+          percentage.mul(scale).floor().sub(1).toNumber()
+        );
+        const distribution = bool(percentage.toNumber());
+
+        const actual = distribution(zeroEngine);
 
         expect(actual).toBe(true);
       });
@@ -118,29 +111,26 @@ describe("bool distribution", () => {
   });
 
   describe("when passed two arguments", () => {
-    [0, -1].forEach(numerator => {
-      describe(`when passed ${numerator} for the numerator`, () => {
-        it("always returns false", () => {
-          const distribution = bool(numerator, 10);
-
-          for (let i = 0; i < 10; ++i) {
-            expect(distribution(undefined!)).toBe(false);
-          }
-        });
+    describe.each([0, -1])("when passed %p for the numerator", (numerator) => {
+      it("always returns false", () => {
+        const distribution = bool(numerator, 10);
+        for (let i = 0; i < 10; ++i) {
+          expect(distribution(undefined!)).toBe(false);
+        }
       });
     });
 
-    [0, 1].forEach(addition => {
-      describe(`when passed a numerator that is the denominator + ${addition}`, () => {
+    describe.each([0, 1])(
+      "when passed a numerator that is the denominator + %p",
+      (addition) => {
         it("always returns true", () => {
           const distribution = bool(10 + addition, 10);
-
           for (let i = 0; i < 10; ++i) {
             expect(distribution(undefined!)).toBe(true);
           }
         });
-      });
-    });
+      }
+    );
 
     it("uses the integer distribution and returns true if the numerator is < than the result", () => {
       const numerator = 3;
@@ -148,9 +138,7 @@ describe("bool distribution", () => {
       (integer as jest.Mock).mockImplementation((min, max) => {
         expect(min).toBe(0);
         expect(max).toBe(denominator - 1);
-        return () => {
-          return 2;
-        };
+        return returnTwo;
       });
       const distribution = bool(numerator, denominator);
 
@@ -165,9 +153,7 @@ describe("bool distribution", () => {
       (integer as jest.Mock).mockImplementation((min, max) => {
         expect(min).toBe(0);
         expect(max).toBe(denominator - 1);
-        return () => {
-          return 3;
-        };
+        return returnThree;
       });
       const distribution = bool(numerator, denominator);
 

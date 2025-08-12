@@ -17,9 +17,7 @@ let index = COUNT;
 export const browserCrypto: Engine = {
   next() {
     if (index >= COUNT) {
-      if (data === null) {
-        data = new Int32Array(COUNT);
-      }
+      data ??= new Int32Array(COUNT);
       crypto.getRandomValues(data);
       index = 0;
     }

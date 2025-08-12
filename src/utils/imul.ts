@@ -8,8 +8,8 @@ export const imul: (a: number, b: number) => number = (() => {
     if ((Math as any).imul(UINT32_MAX, 5) === -5) {
       return (Math as any).imul;
     }
-  } catch (_) {
-    // nothing to do here
+  } catch (e) {
+    console.warn("Math.imul is not available or failed the test, using polyfill.", e);
   }
   const UINT16_MAX = 0xffff;
   return (a: number, b: number) => {
