@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
   clearMocks: true,
@@ -11,6 +11,6 @@ module.exports = {
         module: 'commonjs',
         rootDir: './src',
       },
-    },]
-  }
+    }],
+  },
 };
