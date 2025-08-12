@@ -207,6 +207,21 @@ This abstracts the concepts of engines and distributions.
 - `r.hex(length, true)`: Produce a random string comprised of numbers or the characters `ABCDEF` of length `length`.
 - `r.date(start, end)`: Produce a random `Date` within the inclusive range of [`start`, `end`]. `start` and `end` must both be `Date`s.
 
+## What about recreating `Math.random()` with this library?
+
+To get the exact same behavior as JavaScript's native `Math.random()`, you can use the `nativeMath` engine in `random-js`. This engine internally uses `Math.random()`, so the results will match exactly.
+
+```js
+import { Random, nativeMath } from 'random-js';
+
+// Create a Random instance that uses Math.random() under the hood
+const random = new Random(nativeMath);
+
+// Generate a floating-point number in [0, 1], just like Math.random()
+const value = random.real(0, 1, false);
+
+console.log(value);
+
 ## Usage
 
 ### node.js
