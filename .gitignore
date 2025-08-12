@@ -3,6 +3,3 @@ node_modules
 coverage
 .rpt2_cache
 dist
-
-yarn.lock
-bun.lockb
