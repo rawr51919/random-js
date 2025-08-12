@@ -238,7 +238,7 @@ or
 yarn add random-js
 ```
 
-If you wish to get a version without `nodeCrypto` (which is known to cause issues with some use cases, like some web applications), run this command:
+If you wish to get a version without `nodeCrypto` (which is known to cause issues with some use cases, like some web applications and React Native), run this command:
 
 ```sh
 npm install random-js-no-node
@@ -250,7 +250,7 @@ or
 yarn add random-js-no-node
 ```
 
-Or add Webpack 5+ polyfills for crypto to use `crypto-browserify` in your application's webpack config file:
+Or add Webpack 5+ polyfills for crypto to use `crypto-browserify` in your application's webpack config file (in the case of a web application):
 
 ```js
 resolve: {
@@ -258,6 +258,12 @@ resolve: {
         "crypto": require.resolve("crypto-browserify")
     }
 }
+```
+
+Or add Hermes JavaScript polyfill libraries for crypto (in the case of React Native):
+
+```sh
+npm install crypto-browserify react-native-get-random-values
 ```
 
 These polyfills may depend on your application's needs, visit [the Webpack 5+ polyfills documentation](https://webpack.js.org/configuration/resolve/#resolvefallback) and [this Webpack 5+ polyfills cheatsheet](https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a) to learn more.
