@@ -54,7 +54,7 @@ Some common, biased, _incorrect_ tool for generating random integers is as follo
 
 The problem with both of these approaches is that the distribution of integers that it returns is not uniform. That is, it might be more biased to return `0` rather than `1`, making it inherently broken.
 
-`randomInt` may more evenly distribute its biased, but it is still wrong. `randomIntByModulo`, at least in the example given, is heavily biased to return [0, 67] over [68, 99].
+`randomInt` may more evenly distribute its bias, but it is still wrong. `randomIntByModulo`, at least in the example given, is heavily biased to return [0, 67] over [68, 99].
 
 It is vastly more apparent in integers close to 2^32, or really any integer that approaches but not surpass 2^n. Given a perfectly uniform integer distribution, one can play a monte carlo game and run through each possibility of integers. In the following example, assume that we're only dealing with a floating point that holds 4 bits instead of 53 or 32 (which is `Math.random()`'s bit randomness, based on the engine):
 
