@@ -112,7 +112,7 @@ Testing is essential to ensure your RNG engine behaves correctly, is reproducibl
 ### What to Test
 
 - **Seed reproducibility:** Confirm that using the same seed produces the same sequence of outputs.
-- **Output range:** Verify all generated values are within the expected range (usually `[0, 1)`).
+- **Output range:** Verify all generated values are within the expected range (usually `[0, 1]`).
 - **Output distribution (optional):** Basic statistical checks or randomness properties.
 - **Error handling:** Confirm your engine handles invalid or edge-case inputs gracefully.
 
