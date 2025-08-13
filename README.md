@@ -1,6 +1,6 @@
 # Random.js
 
-[![Build Status](https://travis-ci.org/ckknight/random-js.svg?branch=master)](https://travis-ci.org/ckknight/random-js)
+[![Build Status](https://github.com/ckknight/random-js/actions/workflows/build.yml/badge.svg)](https://github.com/ckknight/random-js)
 [![CDNJS](https://img.shields.io/cdnjs/v/random-js.svg)](https://cdnjs.com/libraries/random-js)
 
 This is designed to be a mathematically correct random number generator library for JavaScript.
