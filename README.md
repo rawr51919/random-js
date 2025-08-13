@@ -221,6 +221,7 @@ const random = new Random(nativeMath);
 const value = random.real(0, 1, false);
 
 console.log(value);
+```
 
 ## Usage
 
