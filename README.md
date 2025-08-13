@@ -91,6 +91,7 @@ Random.js provides a series of distributions to alleviate this.
 - `browserCrypto`: Utilizes `crypto.getRandomValues()`
 - `nodeCrypto`: Utilizes `require('crypto').randomBytes()`
 - `MersenneTwister19937`: Produces a new Mersenne Twister. Must be seeded before use.
+- `XorGen4096`: Produces a new xorgens-4096 PRNG. Must be seeded before use.
 
 Or you can make your own!
 
