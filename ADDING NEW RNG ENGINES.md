@@ -131,7 +131,7 @@ describe('myEngine', () => {
     expect(engine1.next()).toBe(engine2.next());
   });
 
-  test('produces numbers in [0, 1)', () => {
+  test('produces numbers in [0, 1]', () => {
     const engine = new myEngine(6789);
     for (let i = 0; i < 1000; i++) {
       const val = engine.next();
